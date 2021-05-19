@@ -1,9 +1,13 @@
 import cv2
 from feature_extraction_recompose import Scissors
+# from scissors.feature_extraction import Scissors
 import numpy as np
+from multiprocessing import Pool
+from pathos.multiprocessing import ProcessingPool as Pool
+# from functools import partial
 
 MAX_cou = 1000
-COOL = 18
+COOL = 20
 
 
 def list_logical_and(list_a, list_b):  # b长a短
@@ -38,9 +42,10 @@ def findContours_g(img_G_path, img_RGB_path):
     # 灰度图二值化
     ret, img_b = cv2.threshold(img_g, 0, 255, cv2.THRESH_OTSU)
     # 闭开运算
-    kernel = np.ones((13, 13), np.uint8)
-    img_b = cv2.morphologyEx(img_b, cv2.MORPH_CLOSE, kernel)
-    img_b = cv2.morphologyEx(img_b, cv2.MORPH_OPEN, kernel)
+    kernel_CLOSE = np.ones((13, 13), np.uint8)
+    kernel_OPEN = np.ones((9, 9), np.uint8)
+    img_b = cv2.morphologyEx(img_b, cv2.MORPH_CLOSE, kernel_CLOSE)
+    img_b = cv2.morphologyEx(img_b, cv2.MORPH_OPEN, kernel_OPEN)
     # 灰度图寻找边缘
     contours_g, hierarchy = cv2.findContours(img_b, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     return contours_g, img_rgb  # 返回img_rgb以便画图,contours_g的shape是list里面装着(1,n,2)
@@ -123,39 +128,60 @@ def Intelligent_scissors(contour, scissors):
     list_contours = list_contours + list_b
     print(list_contours)
 
-    return list_contours
+    out=np.array(list_contours).reshape(-1, 1, 2)
+    out=out[:, :, [1, 0]]
+    return out
 
+def path_multi():
+    pass
 
 if __name__ == '__main__':
+    print('test1')
+
     img_G_path = 'gary.jpg'
     img_RGB_path = 'rbg.jpg'
     contours_g, img_rgb = findContours_g(img_G_path, img_RGB_path)
 
+    #特征图
+    scissors = Scissors(img_rgb, use_dynamic_features=False)
+
     # 灰度图寻找较大边缘
     contours_g_out = []
+    scissors_list=[]
     for k in contours_g:
-        if len(k) > 100:
+        if len(k) > 150:
             print(len(k))
             contours_g_out.append(k)
+            scissors_list.append(scissors)
+
 
     # 叠加显示
     img_rgb_c = cv2.drawContours(img_rgb, contours_g_out, -1, (0, 255, 0), 3)
     cv2.imwrite('img_rgb_c.jpg', img_rgb_c)
 
-    scissors = Scissors(img_rgb, use_dynamic_features=False)
+
     # scissors = Scissors(img_rgb, use_dynamic_features=True)
-    out_end=[]
-    for c in contours_g_out:
-        print('\n######new_contours######')
-        contour = Intelligent_scissors(c, scissors)  # 以第0个轮廓为例
-        out = np.array(contour).reshape(-1, 1, 2)
-        out_end.append(out[:, :, [1, 0]])
+
+    #找边缘
+    # mult_list=[]
+    # out_end=[]
+    p = Pool()
+
+    # for c in contours_g_out:
+    #     print('\n######mult######')
+    #     # contour = Intelligent_scissors(c, scissors)  # 以第0个轮廓为例
+
+    # partial_func = partial(Intelligent_scissors, scissors=scissors)
+    out_end=p.map(Intelligent_scissors,contours_g_out,scissors_list)
     print(out_end)
+
+
+    #画边缘
     img_out = cv2.drawContours(img_rgb_c, out_end, -1, (255, 0, 0), 3)
 
     # 创造一个遮罩
     mask = np.zeros(img_rgb.shape).astype(img_rgb.dtype)
     mask_out = cv2.drawContours(mask, out_end, -1, (255, 255, 255), -1)  # 画边缘
 
-    cv2.imwrite('1-undynamic-18.jpg', img_out)
-    cv2.imwrite('1-undynamic_m-18.jpg', mask_out)
+    cv2.imwrite('20-cl.jpg', img_out)
+    cv2.imwrite('20m-cl.jpg', mask_out)

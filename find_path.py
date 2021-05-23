@@ -1,18 +1,20 @@
 import cv2
 from feature_extraction_recompose import Scissors
-# from scissors.feature_extraction import Scissors
+from scissors.feature_extraction import Scissors
 import numpy as np
 from multiprocessing import Pool
 from pathos.multiprocessing import ProcessingPool as Pool
+
 # from functools import partial
 
 MAX_cou = 1000
 COOL = 20
 
 
-def list_logical_and(list_a, list_b):  # b长a短
-    # print(list_a)
-    # print(list_b)
+def list_logical_and(list_a, list_b):  # 相与
+    # b长a短
+    print(list_a)
+    print(list_b)
     if list_a == []:
         list_a = [[0, 0]]
     if list_b == []:
@@ -33,13 +35,14 @@ def list_logical_and(list_a, list_b):  # b长a短
 
 def findContours_g(img_G_path, img_RGB_path):
     # 读灰度图与RGB
-    print(img_G_path)
-    print(img_RGB_path)
+    # print(img_G_path)
+    # print(img_RGB_path)
     img_g = cv2.imread(img_G_path, 0)
     img_rgb = cv2.imread(img_RGB_path)
     img_rgb2g = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
 
     # 灰度图二值化
+    # img_g = cv2.GaussianBlur(img_g, (5, 5), 0)  # 高斯滤波
     ret, img_b = cv2.threshold(img_g, 0, 255, cv2.THRESH_OTSU)
     # 闭开运算
     kernel_CLOSE = np.ones((13, 13), np.uint8)
@@ -51,7 +54,8 @@ def findContours_g(img_G_path, img_RGB_path):
     return contours_g, img_rgb  # 返回img_rgb以便画图,contours_g的shape是list里面装着(1,n,2)
 
 
-def Intelligent_scissors(contour, scissors):
+def Intelligent_scissors(contour, scissors,cool_number):
+    print("Intelligent_scissors")
     # reshape
     contour = contour.reshape(contour.shape[0], 2)
     # print(contour.shape)
@@ -98,7 +102,7 @@ def Intelligent_scissors(contour, scissors):
 
             # 出栈大于COOL的点
             for p in range(MAX_cou):
-                if list_cou[p] >= COOL:
+                if list_cou[p] >= cool_number:
                     seed_y, seed_x = list_b.pop(0)
                     list_contours.append([seed_y, seed_x])  # 不将x,y转正！
                     list_cou[p] = 0
@@ -128,60 +132,58 @@ def Intelligent_scissors(contour, scissors):
     list_contours = list_contours + list_b
     print(list_contours)
 
-    out=np.array(list_contours).reshape(-1, 1, 2)
-    out=out[:, :, [1, 0]]
+    print("out")
+    out = np.array(list_contours).reshape(-1, 1, 2)
+    out = out[:, :, [1, 0]]
+    print(out)
     return out
+
 
 def path_multi():
     pass
 
+
 if __name__ == '__main__':
-    print('test1')
+    img_G_path = 'gary.jpg'  # 灰度图路径
+    img_RGB_path = 'rbg.jpg'  # 彩色图路径
+    contours_g, img_rgb = findContours_g(img_G_path, img_RGB_path)  # 获取初始二值化路径。返回路径和rgb图
 
-    img_G_path = 'gary.jpg'
-    img_RGB_path = 'rbg.jpg'
-    contours_g, img_rgb = findContours_g(img_G_path, img_RGB_path)
-
-    #特征图
-    scissors = Scissors(img_rgb, use_dynamic_features=False)
+    # 高斯滤波后生成特征图
+    img_rgb_gaussian = cv2.GaussianBlur(img_rgb, (5, 5), 0)  # 高斯滤波
+    scissors = Scissors(img_rgb_gaussian, use_dynamic_features=False)  # 特征图！！
 
     # 灰度图寻找较大边缘
     contours_g_out = []
-    scissors_list=[]
+    scissors_list = []
+    cool_list=[]
     for k in contours_g:
         if len(k) > 150:
             print(len(k))
             contours_g_out.append(k)
             scissors_list.append(scissors)
-
+            cool_list.append(COOL)
 
     # 叠加显示
     img_rgb_c = cv2.drawContours(img_rgb, contours_g_out, -1, (0, 255, 0), 3)
-    cv2.imwrite('img_rgb_c.jpg', img_rgb_c)
-
+    # cv2.imwrite('img_rgb_c.jpg', img_rgb_c)
 
     # scissors = Scissors(img_rgb, use_dynamic_features=True)
 
-    #找边缘
-    # mult_list=[]
-    # out_end=[]
+    # 找边缘
     p = Pool()
-
-    # for c in contours_g_out:
-    #     print('\n######mult######')
-    #     # contour = Intelligent_scissors(c, scissors)  # 以第0个轮廓为例
-
-    # partial_func = partial(Intelligent_scissors, scissors=scissors)
-    out_end=p.map(Intelligent_scissors,contours_g_out,scissors_list)
+    out_end = p.map(Intelligent_scissors, contours_g_out, scissors_list,cool_list)
     print(out_end)
+    # 单线程方法！！
+    # i=Intelligent_scissors(c,scissors)  c为一个轮廓，scissors为特征图
+    # out_end=[i]
 
-
-    #画边缘
+    # 画边缘
     img_out = cv2.drawContours(img_rgb_c, out_end, -1, (255, 0, 0), 3)
 
     # 创造一个遮罩
     mask = np.zeros(img_rgb.shape).astype(img_rgb.dtype)
     mask_out = cv2.drawContours(mask, out_end, -1, (255, 255, 255), -1)  # 画边缘
 
-    cv2.imwrite('20-cl.jpg', img_out)
-    cv2.imwrite('20m-cl.jpg', mask_out)
+    # 画
+    cv2.imwrite('20-cl-g.jpg', img_out)
+    cv2.imwrite('20m-cl-g .jpg', mask_out)

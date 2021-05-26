@@ -1,6 +1,6 @@
 import cv2
 from feature_extraction_recompose import Scissors
-from scissors.feature_extraction import Scissors
+# from scissors.feature_extraction import Scissors
 import numpy as np
 from multiprocessing import Pool
 from pathos.multiprocessing import ProcessingPool as Pool
@@ -13,8 +13,8 @@ COOL = 20
 
 def list_logical_and(list_a, list_b):  # 相与
     # b长a短
-    print(list_a)
-    print(list_b)
+    # print(list_a)
+    # print(list_b)
     if list_a == []:
         list_a = [[0, 0]]
     if list_b == []:
@@ -130,7 +130,7 @@ def Intelligent_scissors(contour, scissors,cool_number):
 
     # 剩余的list_b加入最终队列中
     list_contours = list_contours + list_b
-    print(list_contours)
+    # print(list_contours)
 
     print("out")
     out = np.array(list_contours).reshape(-1, 1, 2)
@@ -185,5 +185,5 @@ if __name__ == '__main__':
     mask_out = cv2.drawContours(mask, out_end, -1, (255, 255, 255), -1)  # 画边缘
 
     # 画
-    cv2.imwrite('20-cl-g.jpg', img_out)
-    cv2.imwrite('20m-cl-g .jpg', mask_out)
+    cv2.imwrite('c1-20.jpg', img_out)
+    cv2.imwrite('c1m-20.jpg', mask_out)

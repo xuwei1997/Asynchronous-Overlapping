@@ -13,12 +13,23 @@ from scissors.utils import unfold, create_spatial_feats, flatten_first_dims, qua
 default_params = {
     # static params
     # sum of all weights must be equal to 1
-    'laplace': 0.3,
-    'direction': 0.2,
-    'magnitude': 0.2,
-    'local': 0.1,
-    'inner': 0.1,
-    'outer': 0.1,
+
+    #源代码
+    # 'laplace': 0.3, #拉普拉斯过零点
+    # 'direction': 0.2, #梯度方向
+    # 'magnitude': 0.2, #梯度大小
+    # 'local': 0.1,
+    # 'inner': 0.1,
+    # 'outer': 0.1,
+
+    #更改
+    'laplace': 0.43, #拉普拉斯过零点
+    'direction': 0.43, #梯度方向
+    'magnitude': 0.14, #梯度大小
+    'local': 0,
+    'inner': 0,
+    'outer': 0,
+
     'laplace_kernels': [3, 5, 7],
     'gaussian_kernel': 5,
     'laplace_weights': [0.2, 0.3, 0.5],

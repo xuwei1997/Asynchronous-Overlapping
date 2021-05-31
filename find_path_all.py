@@ -10,7 +10,7 @@ import os
 
 
 def find_path_one_img(img_G, img_RGB):
-    COOL = 20
+    COOL = 24
 
     img_G_path = os.path.join(r'./gary', img_G)
     img_RGB_path = os.path.join(r'./rbg', img_RGB)
@@ -57,8 +57,8 @@ def find_path_one_img(img_G, img_RGB):
     mask_out = cv2.drawContours(mask, out_end, -1, (255, 255, 255), -1)  # 画边缘
 
     # 画
-    img_out_path = os.path.join(r'./c20o', img_RGB)
-    mask_out_path = os.path.join(r'./c20om', img_RGB)
+    img_out_path = os.path.join(r'./c24-030103', img_RGB)
+    mask_out_path = os.path.join(r'./c24-030103m', img_RGB)
     cv2.imwrite(img_out_path, img_out)
     cv2.imwrite(mask_out_path, mask_out)
 

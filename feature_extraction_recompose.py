@@ -23,9 +23,9 @@ default_params = {
     # 'outer': 0.1,
 
     #更改
-    'laplace': 0.43, #拉普拉斯过零点
-    'direction': 0.43, #梯度方向
-    'magnitude': 0.14, #梯度大小
+    'laplace': 0.3, #拉普拉斯过零点
+    'direction': 0.1, #梯度方向
+    'magnitude': 0.3, #梯度大小
     'local': 0,
     'inner': 0,
     'outer': 0,

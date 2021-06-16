@@ -10,7 +10,7 @@ import os
 
 
 def find_path_one_img(img_G, img_RGB):
-    COOL = 24
+    COOL = 20
 
     img_G_path = os.path.join(r'./gary', img_G)
     img_RGB_path = os.path.join(r'./rbg', img_RGB)
@@ -27,7 +27,7 @@ def find_path_one_img(img_G, img_RGB):
     cool_list = []
     for k in contours_g:
         if len(k) > 150:
-            print(len(k))
+            # print(len(k))
             contours_g_out.append(k)
             scissors_list.append(scissors)
             cool_list.append(COOL)
@@ -49,6 +49,8 @@ def find_path_one_img(img_G, img_RGB):
         o = Intelligent_scissors(c, scissors, COOL)
         out_end.append(o)
 
+    print(img_RGB_path)
+
     # 画边缘
     img_out = cv2.drawContours(img_rgb_c, out_end, -1, (255, 0, 0), 3)
 
@@ -57,8 +59,8 @@ def find_path_one_img(img_G, img_RGB):
     mask_out = cv2.drawContours(mask, out_end, -1, (255, 255, 255), -1)  # 画边缘
 
     # 画
-    img_out_path = os.path.join(r'./c24-030103', img_RGB)
-    mask_out_path = os.path.join(r'./c24-030103m', img_RGB)
+    img_out_path = os.path.join(r'./c20-030203', img_RGB)
+    mask_out_path = os.path.join(r'./c20-030203m', img_RGB)
     cv2.imwrite(img_out_path, img_out)
     cv2.imwrite(mask_out_path, mask_out)
 
@@ -71,11 +73,11 @@ if __name__ == '__main__':
 
     f_gary = os.listdir(path_gary)
     f_rgb = os.listdir(path_rgb)
-    #按文件名排列
-    f_gary=sorted(f_gary)
+    # 按文件名排列
+    f_gary = sorted(f_gary)
     f_rgb = sorted(f_rgb)
-    print(f_gary)
-    print(f_rgb)
+    # print(f_gary)
+    # print(f_rgb)
 
     # find_path_one_img(f_gary[0],f_rgb[0])
     p0 = Pool()

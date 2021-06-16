@@ -1,5 +1,6 @@
 import cv2
-from feature_extraction_recompose import Scissors
+# from feature_extraction_recompose import Scissors
+from feature_extraction_recompose_2 import Scissors #更改参数
 # from scissors.feature_extraction import Scissors
 import numpy as np
 from multiprocessing import Pool
@@ -150,7 +151,7 @@ if __name__ == '__main__':
 
     # 高斯滤波后生成特征图
     img_rgb_gaussian = cv2.GaussianBlur(img_rgb, (5, 5), 0)  # 高斯滤波
-    scissors = Scissors(img_rgb_gaussian, use_dynamic_features=False)  # 特征图！！
+    scissors = Scissors(img_rgb_gaussian,laplace_w=0.3, direction_w=0.2,magnitude_w=0.2, use_dynamic_features=False)  # 特征图！！
 
     # 灰度图寻找较大边缘
     contours_g_out = []

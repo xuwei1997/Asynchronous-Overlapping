@@ -1,3 +1,4 @@
+#权重从其他文件导入
 import numpy as np
 #
 from typing import Sequence, Union
@@ -6,6 +7,7 @@ from skimage.filters import gaussian, laplace, sobel_h, sobel_v, sobel
 
 from scissors.search import search
 from scissors.utils import unfold, create_spatial_feats, flatten_first_dims, quadratic_kernel, preprocess_image
+
 
 # Parameters  depend ot the image size.
 # These parameters were selected for 512 x 512 images.
@@ -23,9 +25,9 @@ default_params = {
     # 'outer': 0.1,
 
     #更改
-    'laplace': 0.3, #拉普拉斯过零点
-    'direction': 0.2, #梯度方向
-    'magnitude': 0.3, #梯度大小
+    # 'laplace': 0.3, #拉普拉斯过零点
+    # 'direction': 0.2, #梯度方向
+    # 'magnitude': 0.3, #梯度大小
     'local': 0,
     'inner': 0,
     'outer': 0,
@@ -71,8 +73,8 @@ class StaticExtractor:
         """
 
         std = std or default_params['gaussian_kernel']
-        laplace_w = laplace_w or default_params['laplace']
-        direction_w = direction_w or default_params['direction']
+        # laplace_w = laplace_w or default_params['laplace']
+        # direction_w = direction_w or default_params['direction']
         maximum_cost = maximum_cost or default_params['maximum_cost']
 
         self.std = std
@@ -192,7 +194,7 @@ class CostProcessor:
         n_magnitude_values = n_magnitude_values or default_params['n_magnitude_values']
 
         local_w = local_w or default_params['local']
-        magnitude_w = magnitude_w or default_params['magnitude']
+        # magnitude_w = magnitude_w or default_params['magnitude']
         maximum_cost = maximum_cost or default_params['maximum_cost']
 
         self.inner_weight = inner_w * maximum_cost
@@ -316,7 +318,7 @@ class CostProcessor:
 
 
 class Scissors:
-    def __init__(self, image: np.array, capacity=None, use_dynamic_features=True):
+    def __init__(self, image: np.array,laplace_w, direction_w,magnitude_w, capacity=None, use_dynamic_features=True):
         """
         Parameters
         ----------
@@ -327,7 +329,7 @@ class Scissors:
         """
 
         image, brightness = preprocess_image(image)
-        static_extractor = StaticExtractor()
+        static_extractor = StaticExtractor(laplace_w=laplace_w,direction_w=direction_w)
         static_cost = static_extractor(image, brightness)
 
         self.static_cost = static_cost.astype(np.int)
@@ -335,7 +337,7 @@ class Scissors:
         self.capacity = capacity or default_params['history_capacity']
 
         self.current_dynamic_cost = None
-        self.processor = CostProcessor(image, brightness) if use_dynamic_features else lambda x: None
+        self.processor = CostProcessor(image, brightness,magnitude_w=magnitude_w) if use_dynamic_features else lambda x: None
 
         self.grads_map = sobel(brightness)
         self.processed_pixels = list()

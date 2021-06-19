@@ -10,7 +10,7 @@ from sko.tools import set_run_mode
 import matplotlib.pyplot as plt
 from pathos.multiprocessing import ProcessingPool as Pool
 # from multiprocessing import Pool
-from multiprocessing.dummy import Pool as ThreadPool
+# from multiprocessing.dummy import Pool as ThreadPool
 import os
 from functools import partial
 

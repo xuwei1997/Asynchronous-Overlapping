@@ -7,6 +7,7 @@ from multiprocessing import Pool
 from pathos.multiprocessing import ProcessingPool as Pool
 import random
 # from functools import partial
+from tqdm import tqdm
 
 MAX_cou = 1000
 COOL = 20
@@ -78,8 +79,8 @@ def Intelligent_scissors(contour, scissors,cool_number):
     seed_x = seed_x + 3
     seed_y = seed_y + 3
 
-    for free_pointer in range(0, contour.shape[0]):
-        print(str(NO)+'free_pointer=%d\n' % free_pointer)
+    for free_pointer in tqdm(range(0, contour.shape[0]),desc=str(NO)+str(contour.shape[0]),total = contour.shape[0]):
+        # print(str(NO)+'free_pointer=%d\n' % free_pointer)
 
         # 取free seed并寻路
         free_x, free_y = contour[free_pointer]

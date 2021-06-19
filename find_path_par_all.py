@@ -15,7 +15,7 @@ import os
 from functools import partial
 from statistics import mean
 
-def find_path_one_img(img_PATH, laplace_w, direction_w, magnitude_w):
+def find_path_one_img(img_PATH,COOL, laplace_w, direction_w, magnitude_w):
     img_G, img_RGB=img_PATH
     COOL = 20
 
@@ -23,7 +23,7 @@ def find_path_one_img(img_PATH, laplace_w, direction_w, magnitude_w):
     img_RGB_path = os.path.join(r'/tmp/pycharm_project_836/rbg1', img_RGB)
     img_mark_path = os.path.join(r'/tmp/pycharm_project_836/mark_or', img_RGB)
 
-    print(img_G_path, img_RGB_path)
+    # print(img_G_path, img_RGB_path)
 
     contours_g, img_rgb = findContours_g(img_G_path, img_RGB_path)  # 获取初始二值化路径。返回路径和rgb图
     # 高斯滤波后生成特征图
@@ -101,58 +101,58 @@ def find_path_func(X):  # COOL缩放过
     return mean(niou)
 
 if __name__ == '__main__':
-    X=[0.2,0.3,0.2,0.2]
-    iou=find_path_func(X)
-    print(iou)
+    # X=[0.2,0.3,0.2,0.2]
+    # iou=find_path_func(X)
+    # print(iou)
 
-    # set_run_mode(find_path_func, 'multiprocessing')
-    # print("pao1")
-    # pso = PSO(func=find_path_func, n_dim=4, pop=15, max_iter=30, lb=[0.1, 0.1, 0.1, 0.1], ub=[0.28, 0.8, 0.8, 0.8],
-    #           w=0.8, c1=0.5, c2=0.5)
-    # print("pao2")
-    # pso.record_mode = True
-    # print("pao3")
-    #
-    # #5
-    # print("pao4")
-    # pso.run(5)
-    # print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
-    # plt.plot(pso.gbest_y_hist)
-    # plt.savefig('5.png')
-    # record_dict = pso.record_value
-    # f = open('5.txt', 'w')
-    # f.write(str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
-    # f.close()
-    #
-    # #10
-    # pso.run(5)
-    # print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
-    # plt.plot(pso.gbest_y_hist)
-    # plt.savefig('10.png')
-    # record_dict = pso.record_value
-    # f = open('10.txt', 'w')
-    # f.write(str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
-    # f.close()
-    #
-    # #15
-    # pso.run(5)
-    # print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
-    # plt.plot(pso.gbest_y_hist)
-    # plt.savefig('15.png')
-    # record_dict = pso.record_value
-    # f = open('15.txt', 'w')
-    # f.write(str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
-    # f.close()
-    #
-    # #20
-    # pso.run(5)
-    # print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
-    # plt.plot(pso.gbest_y_hist)
-    # plt.savefig('20.png')
-    # record_dict = pso.record_value
-    # f = open('20.txt', 'w')
-    # f.write(str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
-    # f.close()
-    #
-    # print(pso.record_value)
-    #
+    set_run_mode(find_path_func, 'multiprocessing')
+    print("pao1")
+    pso = PSO(func=find_path_func, n_dim=4, pop=15, max_iter=30, lb=[0.1, 0.1, 0.1, 0.1], ub=[0.28, 0.8, 0.8, 0.8],
+              w=0.8, c1=0.5, c2=0.5)
+    print("pao2")
+    pso.record_mode = True
+    print("pao3")
+
+    #5
+    print("pao4")
+    pso.run(5)
+    print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
+    plt.plot(pso.gbest_y_hist)
+    plt.savefig('5.png')
+    record_dict = pso.record_value
+    f = open('5.txt', 'w')
+    f.write(str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
+    f.close()
+
+    #10
+    pso.run(5)
+    print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
+    plt.plot(pso.gbest_y_hist)
+    plt.savefig('10.png')
+    record_dict = pso.record_value
+    f = open('10.txt', 'w')
+    f.write(str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
+    f.close()
+
+    #15
+    pso.run(5)
+    print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
+    plt.plot(pso.gbest_y_hist)
+    plt.savefig('15.png')
+    record_dict = pso.record_value
+    f = open('15.txt', 'w')
+    f.write(str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
+    f.close()
+
+    #20
+    pso.run(5)
+    print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
+    plt.plot(pso.gbest_y_hist)
+    plt.savefig('20.png')
+    record_dict = pso.record_value
+    f = open('20.txt', 'w')
+    f.write(str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
+    f.close()
+
+    print(pso.record_value)
+

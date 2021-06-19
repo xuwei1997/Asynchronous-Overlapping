@@ -79,7 +79,7 @@ def Intelligent_scissors(contour, scissors,cool_number):
     seed_x = seed_x + 3
     seed_y = seed_y + 3
 
-    for free_pointer in tqdm(range(0, contour.shape[0]),desc=str(NO)+str(contour.shape[0]),total = contour.shape[0]):
+    for free_pointer in tqdm(range(0, contour.shape[0]),desc=str(NO)+'_'+str(contour.shape[0]),total = contour.shape[0]):
         # print(str(NO)+'free_pointer=%d\n' % free_pointer)
 
         # 取free seed并寻路

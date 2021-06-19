@@ -5,7 +5,7 @@ from feature_extraction_recompose_2 import Scissors #更改参数
 import numpy as np
 from multiprocessing import Pool
 from pathos.multiprocessing import ProcessingPool as Pool
-
+import random
 # from functools import partial
 
 MAX_cou = 1000
@@ -56,7 +56,8 @@ def findContours_g(img_G_path, img_RGB_path):
 
 
 def Intelligent_scissors(contour, scissors,cool_number):
-    print("Intelligent_scissors")
+    NO=random.randint(1,99)
+    print(str(NO)+"Intelligent_scissors")
     # reshape
     contour = contour.reshape(contour.shape[0], 2)
     # print(contour.shape)
@@ -78,14 +79,14 @@ def Intelligent_scissors(contour, scissors,cool_number):
     seed_y = seed_y + 3
 
     for free_pointer in range(0, contour.shape[0]):
-        print('\nfree_pointer=%d' % free_pointer)
+        print(str(NO)+'free_pointer=%d\n' % free_pointer)
 
         # 取free seed并寻路
         free_x, free_y = contour[free_pointer]
         # seed_x, seed_y = contour[seed_pointer]
         # print(free_x, free_y, seed_x, seed_y)
-        print('free_x_y=(%d,%d) seed_x_y=(%d,%d)' % (free_x, free_y, seed_x, seed_y))
-        if free_x > 4 and free_y > 4:  # 不是边界
+        # print('free_x_y=(%d,%d) seed_x_y=(%d,%d)' % (free_x, free_y, seed_x, seed_y))
+        if free_x > 6 and free_y > 6:  # 不是边界
             list_b = scissors.find_path(seed_x, seed_y, free_x, free_y)
             # list_b = scissors.find_path(seed_x, seed_y, free_x, free_y)  # 输出的是(y,x),从free到seed.
             list_b = list(reversed(list_b))  # 翻转，从seed到free

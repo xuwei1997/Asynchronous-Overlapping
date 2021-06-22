@@ -15,9 +15,13 @@ import os
 from functools import partial
 from statistics import mean
 
+def out_log(string):
+    f = "log.txt"
+    with open(f, "a") as file:  # 只需要将之前的”w"改为“a"即可，代表追加内容
+        file.write(string + "\n")
+
 def find_path_one_img(img_PATH,COOL, laplace_w, direction_w, magnitude_w):
     img_G, img_RGB=img_PATH
-    COOL = 20
 
     img_G_path = os.path.join(r'/tmp/pycharm_project_836/gary1', img_G)
     img_RGB_path = os.path.join(r'/tmp/pycharm_project_836/rbg1', img_RGB)
@@ -47,9 +51,9 @@ def find_path_one_img(img_PATH,COOL, laplace_w, direction_w, magnitude_w):
 
     # #  单线进程方法2！！
     Intelligent_scissors_par = partial(Intelligent_scissors, scissors=scissors, cool_number=COOL)
-    print('map')
+    # print('map')
     out_end = list(map(Intelligent_scissors_par, contours_g_out))
-    print(out_end)
+    # print(out_end)
 
     # 画边缘
     img_out = cv2.drawContours(img_rgb_c, out_end, -1, (255, 0, 0), 3)
@@ -60,9 +64,9 @@ def find_path_one_img(img_PATH,COOL, laplace_w, direction_w, magnitude_w):
 
     #处理路径并保存
     path_mask = str(COOL) + '_' + str(laplace_w) + '_' + str(direction_w) + '_' + str(magnitude_w)
-    path_out = str(COOL) + '_' + str(laplace_w) + '_' + str(direction_w) + '_' + str(magnitude_w)
+    # path_out = str(COOL) + '_' + str(laplace_w) + '_' + str(direction_w) + '_' + str(magnitude_w)
     mask_dire=os.path.join(r'/tmp/pycharm_project_836/',path_mask)
-    out_dire=os.path.join(r'/tmp/pycharm_project_836/',path_out)
+    out_dire=os.path.join(mask_dire,'out_rgb/')
     if os.path.exists(mask_dire) == False:  # 查看是否有文件夹
         os.mkdir(mask_dire)
     if os.path.exists(out_dire) == False:  # 查看是否有文件夹
@@ -82,6 +86,7 @@ def find_path_one_img(img_PATH,COOL, laplace_w, direction_w, magnitude_w):
 def find_path_func(X):  # COOL缩放过
     COOL, laplace_w, direction_w, magnitude_w = X
     print(COOL, laplace_w, direction_w, magnitude_w)
+    COOL = int(COOL * 100)
 
     path_gary = r'/tmp/pycharm_project_836/gary1'
     path_rgb = r'/tmp/pycharm_project_836/rbg1'
@@ -97,6 +102,10 @@ def find_path_func(X):  # COOL缩放过
     niou=list(map(find_path_one_img_par,f_zip))
     print("niou")
     print(niou)
+
+    log=str(niou)+'_'+str(mean(niou)) +str(COOL) + '_' + str(laplace_w) + '_' + str(direction_w) + '_' + str(magnitude_w)
+    out_log(log)
+    print(log)
 
     return mean(niou)
 

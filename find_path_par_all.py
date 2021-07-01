@@ -57,7 +57,7 @@ def find_path_one_img(img_PATH,COOL, laplace_w, direction_w, magnitude_w):
     # print(out_end)
     #多进程方法
     # print('map')
-    p2 = Pool()
+    p2 = Pool(2)
     out_end = p2.map(Intelligent_scissors_par, contours_g_out)
 
     # 画边缘
@@ -124,63 +124,23 @@ if __name__ == '__main__':
     set_run_mode(find_path_func, 'multiprocessing')
     # set_run_mode(find_path_func, 'multithreading')
 
-    print("pao1")
-    pso = PSO(func=find_path_func, n_dim=4, pop=15, max_iter=30, lb=[0.1, 0.1, 0.1, 0.1], ub=[0.28, 0.8, 0.8, 0.8],
+    print("pso1")
+    max_i = 30
+    pso = PSO(func=find_path_func, n_dim=4, pop=15, max_iter=max_i, lb=[0.1, 0.1, 0.1, 0.1], ub=[0.28, 0.8, 0.8, 0.8],
               w=0.8, c1=0.5, c2=0.5)
-    print("pao2")
+    print("pso2")
     pso.record_mode = True
-    print("pao3")
 
-    # 1
-    print("pao4")
-    pso.run(2)
-    print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
-    plt.plot(pso.gbest_y_hist)
-    plt.savefig('2.png')
-    record_dict = pso.record_value
-    f = open('2.txt', 'w')
-    f.write(str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
-    f.close()
-
-    5
-    print("pao4")
-    pso.run(4)
-    print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
-    plt.plot(pso.gbest_y_hist)
-    plt.savefig('5.png')
-    record_dict = pso.record_value
-    f = open('5.txt', 'w')
-    f.write(str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
-    f.close()
-
-    #10
-    pso.run(5)
-    print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
-    plt.plot(pso.gbest_y_hist)
-    plt.savefig('10.png')
-    record_dict = pso.record_value
-    f = open('10.txt', 'w')
-    f.write(str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
-    f.close()
-
-    #15
-    pso.run(5)
-    print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
-    plt.plot(pso.gbest_y_hist)
-    plt.savefig('15.png')
-    record_dict = pso.record_value
-    f = open('15.txt', 'w')
-    f.write(str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
-    f.close()
-
-    #20
-    pso.run(5)
-    print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
-    plt.plot(pso.gbest_y_hist)
-    plt.savefig('20.png')
-    record_dict = pso.record_value
-    f = open('20.txt', 'w')
-    f.write(str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
-    f.close()
+    print("pso3")
+    for i in range(max_i):
+        pso.run(1)
+        print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
+        plt.plot(pso.gbest_y_hist)
+        plt.title('NO:'+str(i))
+        plt.savefig('pso.png')
+        record_dict = pso.record_value
+        f = open('pso.txt', 'w')
+        f.write('NO:'+str(i)+'_'+str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
+        f.close()
 
     print(pso.record_value)

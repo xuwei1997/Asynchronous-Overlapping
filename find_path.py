@@ -8,6 +8,7 @@ from pathos.multiprocessing import ProcessingPool as Pool
 import random
 # from functools import partial
 from tqdm import tqdm
+from functools import partial
 
 MAX_cou = 3000
 
@@ -38,9 +39,13 @@ def list_logical_and(list_a, list_b):  # 相与
 
 
 def findContours_g(img_G_path, img_RGB_path):
+    #防止线程错误！
+    cv2.setNumThreads(1)
+
     # 读灰度图与RGB
     # print(img_G_path)
     # print(img_RGB_path)
+    # cv2.setNumThreads(1)
     img_g = cv2.imread(img_G_path, 0)
     img_rgb = cv2.imread(img_RGB_path)
     img_rgb2g = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
@@ -49,7 +54,7 @@ def findContours_g(img_G_path, img_RGB_path):
     # img_g = cv2.GaussianBlur(img_g, (5, 5), 0)  # 高斯滤波
     ret, img_b = cv2.threshold(img_g, 0, 255, cv2.THRESH_OTSU)
     # 闭开运算
-    kernel_CLOSE = np.ones((13, 13), np.uint8)
+    kernel_CLOSE = np.ones((15, 15), np.uint8)
     kernel_OPEN = np.ones((9, 9), np.uint8)
     img_b = cv2.morphologyEx(img_b, cv2.MORPH_CLOSE, kernel_CLOSE)
     img_b = cv2.morphologyEx(img_b, cv2.MORPH_OPEN, kernel_OPEN)
@@ -60,7 +65,13 @@ def findContours_g(img_G_path, img_RGB_path):
 
 def Intelligent_scissors(contour, scissors, cool_number):
     NO = random.randint(101, 999)  # 随机生成3位序号
-    print(str(NO) + "Intelligent_scissors")
+    # print(str(NO) + "Intelligent_scissors" + str(len(contour)))
+    if len(contour) < 70:
+        print("len(contour) < 70")
+        out0 = np.array(contour).reshape(-1, 1, 2)
+        # print(out0.shape)
+        return out0
+
     # reshape
     contour = contour.reshape(contour.shape[0], 2)
     # print(contour.shape)
@@ -81,8 +92,9 @@ def Intelligent_scissors(contour, scissors, cool_number):
     seed_x = seed_x + 3
     seed_y = seed_y + 3
 
-    for free_pointer in tqdm(range(0, contour.shape[0]), desc=str(NO) + '_' + str(contour.shape[0]),
-                             total=contour.shape[0]):
+    # for free_pointer in tqdm(range(0, contour.shape[0]), desc=str(NO) + '_' + str(contour.shape[0]),
+    #                          total=contour.shape[0]):
+    for free_pointer in range(0, contour.shape[0]):
         # print(str(NO)+'free_pointer=%d\n' % free_pointer)
 
         # 取free seed并寻路
@@ -90,7 +102,7 @@ def Intelligent_scissors(contour, scissors, cool_number):
         # seed_x, seed_y = contour[seed_pointer]
         # print(free_x, free_y, seed_x, seed_y)
         # print('free_x_y=(%d,%d) seed_x_y=(%d,%d)' % (free_x, free_y, seed_x, seed_y))
-        if free_x > 5 and free_y > 5:  # 不是边界
+        if free_x > 6 and free_y > 6:  # 不是边界
             list_b = scissors.find_path(seed_x, seed_y, free_x, free_y)
             # list_b = scissors.find_path(seed_x, seed_y, free_x, free_y)  # 输出的是(y,x),从free到seed.
             list_b = list(reversed(list_b))  # 翻转，从seed到free
@@ -102,6 +114,7 @@ def Intelligent_scissors(contour, scissors, cool_number):
             for i, b in enumerate(list_and):
                 if i > MAX_cou:
                     # 若list_and 已超过MAX_cou,则直接将第一个点list_cou设为COOL,输出第一个点
+                    print("i > MAX_cou")
                     list_cou[0] = list_cou[0] + cool_number
                     break
                 if b:
@@ -110,12 +123,15 @@ def Intelligent_scissors(contour, scissors, cool_number):
                     list_cou[i:] = 0  # 若路径与之前不一致，不一致及之后清零
                     break
 
+
+
             # 出栈大于COOL的点
             for p in range(MAX_cou):
                 if list_cou[p] >= cool_number:
-                    seed_y, seed_x = list_b.pop(0)
-                    list_contours.append([seed_y, seed_x])  # 不将x,y转正！
-                    list_cou[p] = 0
+                    if list_b:
+                        seed_y, seed_x = list_b.pop(0)
+                        list_contours.append([seed_y, seed_x])  # 不将x,y转正！
+                        list_cou[p] = 0
                     # seed_pointer=seed_pointer+1 #冻结
                 else:
                     break
@@ -129,7 +145,7 @@ def Intelligent_scissors(contour, scissors, cool_number):
             seed_x = free_x
             list_b.append([free_y, free_x])
             list_contours = list_contours + list_b
-            list_b = [0, 0]
+            # list_b = [0, 0]
             # 重新初始化
             list_a = [[0, 0]]
             list_b = []
@@ -142,10 +158,11 @@ def Intelligent_scissors(contour, scissors, cool_number):
     list_contours = list_contours + list_b
     # print(list_contours)
 
-    print("out")
+    # print("out")
     out = np.array(list_contours).reshape(-1, 1, 2)
     out = out[:, :, [1, 0]]
     # print(out)
+    print(out.shape)
     return out
 
 
@@ -157,39 +174,30 @@ if __name__ == '__main__':
     img_G_path = 'gary.jpg'  # 灰度图路径
     img_RGB_path = 'rbg.jpg'  # 彩色图路径
     contours_g, img_rgb = findContours_g(img_G_path, img_RGB_path)  # 获取初始二值化路径。返回路径和rgb图
+    COOL = 20
 
     # 高斯滤波后生成特征图
-    img_rgb_gaussian = cv2.GaussianBlur(img_rgb, (5, 5), 0)  # 高斯滤波
+    img_rgb_gaussian = cv2.GaussianBlur(img_rgb, (3, 3), 0)  # 高斯滤波
     scissors = Scissors(img_rgb_gaussian, laplace_w=0.3, direction_w=0.2, magnitude_w=0.2,
                         use_dynamic_features=False)  # 特征图！！
 
-    # 灰度图寻找较大边缘
-    contours_g_out = []
-    scissors_list = []
-    cool_list = []
     for k in contours_g:
-        if len(k) > 150:
-            print(len(k))
-            contours_g_out.append(k)
-            scissors_list.append(scissors)
-            cool_list.append(COOL)
+        print(len(k))
 
     # 叠加显示
-    img_rgb_c = cv2.drawContours(img_rgb, contours_g_out, -1, (0, 255, 0), 3)
-    # cv2.imwrite('img_rgb_c.jpg', img_rgb_c)
+    img_rgb_c = cv2.drawContours(img_rgb, contours_g, -1, (0, 255, 0), 3)
 
-    # scissors = Scissors(img_rgb, use_dynamic_features=True)
+    # #  单线进程方法2！！
+    Intelligent_scissors_par = partial(Intelligent_scissors, scissors=scissors, cool_number=COOL)
 
     # 找边缘
     p = Pool()
-    out_end = p.map(Intelligent_scissors, contours_g_out, scissors_list, cool_list)
+    out_end = p.map(Intelligent_scissors_par, contours_g)
+    # out_end = p.map(Intelligent_scissors, contours_g, scissors_list, cool_list)
     print(out_end)
-    # 单线程方法！！
-    # i=Intelligent_scissors(c,scissors)  c为一个轮廓，scissors为特征图
-    # out_end=[i]
 
     # 画边缘
-    img_out = cv2.drawContours(img_rgb_c, out_end, -1, (255, 0, 0), 3)
+    img_out = cv2.drawContours(img_rgb_c, out_end, -1, (255, 0, 0), 4)
 
     # 创造一个遮罩
     mask = np.zeros(img_rgb.shape).astype(img_rgb.dtype)

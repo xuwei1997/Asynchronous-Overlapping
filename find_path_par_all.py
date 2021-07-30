@@ -8,9 +8,9 @@ from evaluation import eval
 from sko.PSO import PSO
 from sko.tools import set_run_mode
 import matplotlib.pyplot as plt
-from pathos.multiprocessing import ProcessingPool as Pool
+from pathos.multiprocessing import ProcessingPool as Pool_pa
 # from pathos.multiprocessing import Pool
-# from multiprocessing import Pool
+from multiprocessing import Pool
 # from multiprocessing.dummy import Pool as ThreadPool
 import os
 from functools import partial
@@ -22,79 +22,82 @@ def out_log(string):
         file.write(string + "\n")
 
 def find_path_one_img(img_PATH,COOL, laplace_w, direction_w, magnitude_w):
-    img_G, img_RGB=img_PATH
+    # print('find_path_one_img')
+    try:
+        img_G, img_RGB=img_PATH
+        print(img_RGB,COOL, laplace_w, direction_w, magnitude_w)
 
-    img_G_path = os.path.join(r'/home/zhny/pycharm01/gary1', img_G)
-    img_RGB_path = os.path.join(r'/home/zhny/pycharm01/rbg1', img_RGB)
-    img_mark_path = os.path.join(r'/home/zhny/pycharm01/mark_or', img_RGB)
+        #读取的路径
+        img_G_path = os.path.join(r'./gary1', img_G)
+        img_RGB_path = os.path.join(r'./rbg1', img_RGB)
+        img_mark_path = os.path.join(r'./mark_or', img_RGB)
 
-    # print(img_G_path, img_RGB_path)
+        # 保存的路径
+        path_mask = str(COOL) + '_' + str(laplace_w) + '_' + str(direction_w) + '_' + str(magnitude_w)
+        mask_dire = os.path.join(r'./', path_mask)
+        out_dire = os.path.join(mask_dire, 'out_rgb/')
+        if os.path.exists(mask_dire) == False:  # 查看是否有文件夹
+            os.mkdir(mask_dire)
+        if os.path.exists(out_dire) == False:  # 查看是否有文件夹
+            os.mkdir(out_dire)
 
-    contours_g, img_rgb = findContours_g(img_G_path, img_RGB_path)  # 获取初始二值化路径。返回路径和rgb图
-    # 高斯滤波后生成特征图
-    img_rgb_gaussian = cv2.GaussianBlur(img_rgb, (5, 5), 0)  # 高斯滤波
-    scissors = Scissors(img_rgb_gaussian, laplace_w=laplace_w, direction_w=direction_w, magnitude_w=magnitude_w,
-                        use_dynamic_features=False)
+        img_out_path = os.path.join(out_dire, img_RGB)
+        mask_out_path = os.path.join(mask_dire, img_RGB)
 
-    # 灰度图寻找较大边缘
-    contours_g_out = []
-    # scissors_list = []
-    # cool_list = []
-    for k in contours_g:
-        if len(k) > 50:#50!
-            # print(len(k))
-            contours_g_out.append(k)
-            # scissors_list.append(scissors)
-            # cool_list.append(COOL)
+        #判断是否已经存在生成的图像
+        if os.path.exists(mask_out_path) == False:  # 查看是否有文件，没有才需要生成
 
-    # 叠加显示
-    img_rgb_c = cv2.drawContours(img_rgb, contours_g_out, -1, (0, 255, 0), 3)
+            # print(img_G_path, img_RGB_path)
 
-    # #  单线进程方法2！！
-    Intelligent_scissors_par = partial(Intelligent_scissors, scissors=scissors, cool_number=COOL)
-    # print('map')
-    # out_end = list(map(Intelligent_scissors_par, contours_g_out))
-    # print(out_end)
-    #多进程方法
-    # print('map')
-    p2 = Pool(2)
-    out_end = p2.map(Intelligent_scissors_par, contours_g_out)
+            contours_g, img_rgb = findContours_g(img_G_path, img_RGB_path)  # 获取初始二值化路径。返回路径和rgb图
+            # 高斯滤波后生成特征图
+            img_rgb_gaussian = cv2.GaussianBlur(img_rgb, (5, 5), 0)  # 高斯滤波
+            scissors = Scissors(img_rgb_gaussian, laplace_w=laplace_w, direction_w=direction_w, magnitude_w=magnitude_w,
+                                use_dynamic_features=False)
 
-    # 画边缘
-    img_out = cv2.drawContours(img_rgb_c, out_end, -1, (255, 0, 0), 3)
+            # 叠加显示
+            img_rgb_c = cv2.drawContours(img_rgb, contours_g, -1, (0, 255, 0), 3)
 
-    # 创造一个遮罩
-    mask = np.zeros(img_rgb.shape).astype(img_rgb.dtype)
-    mask_out = cv2.drawContours(mask, out_end, -1, (255, 255, 255), -1)  # 画边缘
+            # #  单线进程方法2！！
+            Intelligent_scissors_par = partial(Intelligent_scissors, scissors=scissors, cool_number=COOL)
+            # print('map')
+            out_end = list(map(Intelligent_scissors_par, contours_g))
+            # print(out_end)
+            #多进程方法
+            # print('map')
+            # print("p2=Pool_pa()")
+            # p2 = Pool_pa(2)
+            # out_end = p2.map(Intelligent_scissors_par, contours_g)
 
-    #处理路径并保存
-    path_mask = str(COOL) + '_' + str(laplace_w) + '_' + str(direction_w) + '_' + str(magnitude_w)
-    # path_out = str(COOL) + '_' + str(laplace_w) + '_' + str(direction_w) + '_' + str(magnitude_w)
-    mask_dire=os.path.join(r'/home/zhny/pycharm01/',path_mask)
-    out_dire=os.path.join(mask_dire,'out_rgb/')
-    if os.path.exists(mask_dire) == False:  # 查看是否有文件夹
-        os.mkdir(mask_dire)
-    if os.path.exists(out_dire) == False:  # 查看是否有文件夹
-        os.mkdir(out_dire)
+            # 画边缘
+            img_out = cv2.drawContours(img_rgb_c, out_end, -1, (255, 0, 0), 3)
 
-    img_out_path = os.path.join(out_dire, img_RGB)
-    mask_out_path = os.path.join(mask_dire, img_RGB)
+            # 创造一个遮罩
+            mask = np.zeros(img_rgb.shape).astype(img_rgb.dtype)
+            mask_out = cv2.drawContours(mask, out_end, -1, (255, 255, 255), -1)  # 画边缘
 
-    cv2.imwrite(img_out_path, img_out)
-    cv2.imwrite(mask_out_path, mask_out)
+            # 保存
+            cv2.imwrite(img_out_path, img_out)
+            cv2.imwrite(mask_out_path, mask_out)
 
-    # iou
-    iou, pa = eval(mask_out_path, img_mark_path)
+        # iou
+        iou, pa = eval(mask_out_path, img_mark_path)
+
+    except BaseException as e:
+        print('except:', e)
+        iou=0
+        print("iou=0")
 
     return -iou  # 最优化取最小值！！取负数！！
 
 def find_path_func(X):  # COOL缩放过
     COOL, laplace_w, direction_w, magnitude_w = X
     print(COOL, laplace_w, direction_w, magnitude_w)
-    COOL = int(COOL * 100)
+    # COOL = int(COOL * 100)
+    COOL = int(COOL)
 
-    path_gary = r'/home/zhny/pycharm01/gary1'
-    path_rgb = r'/home/zhny/pycharm01/rbg1'
+    path_gary = r'./gary1'
+    path_rgb = r'./rbg1'
 
     # 按文件名排列
     f_gary = os.listdir(path_gary)
@@ -106,13 +109,21 @@ def find_path_func(X):  # COOL缩放过
 
     #找边缘
     find_path_one_img_par=partial(find_path_one_img,COOL=COOL, laplace_w=laplace_w, direction_w=direction_w, magnitude_w=magnitude_w)
-    niou=list(map(find_path_one_img_par,f_zip))
-    print("niou")
-    print(niou)
 
-    log=str(niou)+'_'+str(mean(niou)) +str(COOL) + '_' + str(laplace_w) + '_' + str(direction_w) + '_' + str(magnitude_w)
+    # niou=list(map(find_path_one_img_par,f_zip))#单线程方法
+
+    #多线程方法
+
+    p3=Pool_pa(3)
+    # p3.daemon=False
+    # print("p3=Pool_pa()")
+    niou=p3.map(find_path_one_img_par,f_zip)
+    # print("niou")
+    # print(niou)
+
+    log=str(niou)+'_'+str(mean(niou))+'_' +str(COOL) + '_' + str(laplace_w) + '_' + str(direction_w) + '_' + str(magnitude_w)
     out_log(log)
-    print(log)
+    # print(log)
 
     return mean(niou)
 
@@ -120,27 +131,37 @@ if __name__ == '__main__':
     # X=[0.2,0.3,0.2,0.2]
     # iou=find_path_func(X)
     # print(iou)
+    # 防止线程错误！
+    cv2.setNumThreads(1)
 
     set_run_mode(find_path_func, 'multiprocessing')
     # set_run_mode(find_path_func, 'multithreading')
 
     print("pso1")
-    max_i = 30
-    pso = PSO(func=find_path_func, n_dim=4, pop=15, max_iter=max_i, lb=[0.1, 0.1, 0.1, 0.1], ub=[0.28, 0.8, 0.8, 0.8],
-              w=0.8, c1=0.5, c2=0.5)
+    max_i = 50
+    # pso = PSO(func=find_path_func, n_dim=4, pop=20, max_iter=1, lb=[0.12, 0.1, 0.1, 0.1], ub=[0.28, 0.8, 0.8, 0.8],  w=0.8, c1=0.5, c2=0.5)
+    pso = PSO(func=find_path_func, n_dim=4, pop=20, max_iter=1, lb=[10, 0.1, 0.1, 0.1], ub=[40, 0.9, 0.9, 0.9],
+              w=0.95, c1=0.5, c2=0.5)
     print("pso2")
     pso.record_mode = True
 
     print("pso3")
     for i in range(max_i):
         pso.run(1)
-        print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
+        # print('best_x is ', pso.gbest_x, 'best_y is', pso.gbest_y)
         plt.plot(pso.gbest_y_hist)
         plt.title('NO:'+str(i))
-        plt.savefig('pso.png')
+        plt.savefig('NO:'+str(i)+'_pso.png',dpi=300)
         record_dict = pso.record_value
+        #pso.txt
+        # print('pso.txt')
         f = open('pso.txt', 'w')
         f.write('NO:'+str(i)+'_'+str(record_dict) + '\n' + 'best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y))
+        f.close()
+        #pso_hist.txt
+        # print('pso_hist.txt')
+        f = open('pso_hist.txt', 'a')
+        f.write('NO:' + str(i) +'_best_x is ' + str(pso.gbest_x) + 'best_y is' + str(pso.gbest_y) + '\n')
         f.close()
 
     print(pso.record_value)

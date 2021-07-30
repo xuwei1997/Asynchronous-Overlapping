@@ -20,14 +20,14 @@ def eval(pre_path,act_path):
     # print(pre_and_act==255)
     # print(np.sum(pre_and_act==255))
 
-    print('iou:')
+    # print('iou:')
     iou = np.sum(pre_and_act == 255) / np.sum(pre_or_act == 255)
-    print(iou)
+    # print(iou)
 
-    print('pa')
+    # print('pa')
     all = pre.shape[0] * pre.shape[1]
     pa = (np.sum(pre_and_act == 255) + np.sum(npre_and_nact == 255)) / all
-    print(pa)
+    # print(pa)
 
     return iou,pa
 

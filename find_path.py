@@ -15,6 +15,10 @@ MAX_cou = 3000
 
 # COOL = 20
 
+def out_log2(string):
+    f = "no.txt"
+    with open(f, "a") as file:  # 只需要将之前的”w"改为“a"即可，代表追加内容
+        file.write(string + "\n")
 
 def list_logical_and(list_a, list_b):  # 相与
     # b长a短
@@ -48,11 +52,13 @@ def findContours_g(img_G_path, img_RGB_path):
     # cv2.setNumThreads(1)
     img_g = cv2.imread(img_G_path, 0)
     img_rgb = cv2.imread(img_RGB_path)
+
     img_rgb2g = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
 
     # 灰度图二值化
     # img_g = cv2.GaussianBlur(img_g, (5, 5), 0)  # 高斯滤波
     ret, img_b = cv2.threshold(img_g, 0, 255, cv2.THRESH_OTSU)
+
     # 闭开运算
     kernel_CLOSE = np.ones((15, 15), np.uint8)
     kernel_OPEN = np.ones((9, 9), np.uint8)
@@ -65,10 +71,10 @@ def findContours_g(img_G_path, img_RGB_path):
 
 def Intelligent_scissors(contour, scissors, cool_number):
     NO = random.randint(101, 999)  # 随机生成3位序号
-    # print(str(NO) + "Intelligent_scissors" + str(len(contour)))
+    print(str(NO) + "Intelligent_scissors" + str(len(contour)))
     if len(contour) < 70:
-        print("len(contour) < 70")
-        out0 = np.array(contour).reshape(-1, 1, 2)
+        # print("len(contour) < 70")
+        out0 = np.array(contour).reshape(-1, 1, ，2)
         # print(out0.shape)
         return out0
 
@@ -163,6 +169,7 @@ def Intelligent_scissors(contour, scissors, cool_number):
     out = out[:, :, [1, 0]]
     # print(out)
     print(out.shape)
+    out_log2(str(NO) + "Intelligent_scissors" + str(len(contour))+'_'+str(out.shape))
     return out
 
 

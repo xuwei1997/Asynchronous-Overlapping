@@ -6,6 +6,9 @@ def eval(pre_path,act_path):
     pre = cv2.imread(pre_path, 0)
     act = cv2.imread(act_path, 0)
 
+    # pre = cv2.resize(pre, (640, 360), interpolation=cv2.INTER_AREA)
+    # act = cv2.resize(act, (640, 360), interpolation=cv2.INTER_AREA)
+
     # 因为有高斯模糊的边界，所以还得二值化一下ps里出来的照片
     ret, act = cv2.threshold(act, 127, 255, cv2.THRESH_BINARY)
 

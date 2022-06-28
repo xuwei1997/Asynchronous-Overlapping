@@ -1,4 +1,4 @@
-#运用多个图像，寻找最优函数
+#运用单个图像，寻找最优函数
 
 from feature_extraction_recompose_2 import Scissors  # 更改参数
 import numpy as np
@@ -14,15 +14,15 @@ from multiprocessing import Pool
 # from multiprocessing.dummy import Pool as ThreadPool
 import os
 from functools import partial
-from statistics import mean
+# from statistics import mean
 
 def out_log(string):
-    f = "log2.txt"
+    f = "log.txt"
     with open(f, "a") as file:  # 只需要将之前的”w"改为“a"即可，代表追加内容
         file.write(string + "\n")
 
 def find_path_one_img(img_PATH,COOL, laplace_w, direction_w, magnitude_w):
-    # print('find_path_one_img')
+    print('find_path_one_img')
     try:
         img_G, img_RGB=img_PATH
         print(img_RGB,COOL, laplace_w, direction_w, magnitude_w)
@@ -58,16 +58,17 @@ def find_path_one_img(img_PATH,COOL, laplace_w, direction_w, magnitude_w):
             # 叠加显示
             img_rgb_c = cv2.drawContours(img_rgb, contours_g, -1, (0, 255, 0), 3)
 
-            # #  单线进程方法2！！
+            # # #  单线进程方法2！！
             Intelligent_scissors_par = partial(Intelligent_scissors, scissors=scissors, cool_number=COOL)
             # print('map')
-            # out_end = list(map(Intelligent_scissors_par, contours_g))
-            # print(out_end)
-            #多进程方法
-            print('map')
-            print("p2=Pool_pa(3)")
-            p2 = Pool_pa()
-            out_end = p2.map(Intelligent_scissors_par, contours_g)
+            out_end = list(map(Intelligent_scissors_par, contours_g))
+            # # print(out_end)
+
+            #多进程方法!
+            # print('map')
+            # print("p2=Pool_pa()")
+            # p2 = Pool_pa()
+            # out_end = p2.map(Intelligent_scissors_par, contours_g)
 
             # 画边缘
             img_out = cv2.drawContours(img_rgb_c, out_end, -1, (255, 0, 0), 3)
@@ -90,48 +91,27 @@ def find_path_one_img(img_PATH,COOL, laplace_w, direction_w, magnitude_w):
 
     return -iou  # 最优化取最小值！！取负数！！
 
+
 def find_path_func(X):  # COOL缩放过
     COOL, laplace_w, direction_w, magnitude_w = X
-    print(COOL, laplace_w, direction_w, magnitude_w)
-    # COOL = int(COOL * 100)
+    # COOL = int(COOL*100)
     COOL = int(COOL)
-
-    path_gary = r'./gary1'
-    path_rgb = r'./rbg1'
-
-    # 按文件名排列
-    f_gary = os.listdir(path_gary)
-    f_rgb = os.listdir(path_rgb)
-    f_gary = sorted(f_gary)
-    f_rgb = sorted(f_rgb)
-    f_zip=zip(f_gary,f_rgb)
+    print(COOL, laplace_w, direction_w, magnitude_w)
 
 
-    #找边缘
-    find_path_one_img_par=partial(find_path_one_img,COOL=COOL, laplace_w=laplace_w, direction_w=direction_w, magnitude_w=magnitude_w)
+    img_g_name = '1_2021-01-30_18.jpg'
+    img_rgb_name = '1_2021-01-30_15.jpg'
+    img_PATH=(img_g_name,img_rgb_name)
+    niou=find_path_one_img(img_PATH,COOL,laplace_w,direction_w,magnitude_w)
 
-    niou=list(map(find_path_one_img_par,f_zip))#单线程方法
-
-    #多线程方法
-
-    # p3=Pool_pa(8)
-    # p3=Pool_pa(1)
-    # # p3.daemon=False
-    # print("p3=Pool_pa()")
-    # niou=p3.map(find_path_one_img_par,f_zip)
-    # print("niou")
-    # print(niou)
-
-    log=str(niou)+'_'+str(mean(niou))+'_' +str(COOL) + '_' + str(laplace_w) + '_' + str(direction_w) + '_' + str(magnitude_w)
+    log=str(niou)+'_' +str(COOL) + '_' + str(laplace_w) + '_' + str(direction_w) + '_' + str(magnitude_w)
     out_log(log)
     # print(log)
 
-    return mean(niou)
+    return niou
+
 
 if __name__ == '__main__':
-    # X=[0.2,0.3,0.2,0.2]
-    # iou=find_path_func(X)
-    # print(iou)
     # 防止线程错误！
     cv2.setNumThreads(1)
 
@@ -139,11 +119,10 @@ if __name__ == '__main__':
     # set_run_mode(find_path_func, 'multithreading')
 
     print("pso1")
-
-    max_i = 50
+    max_i = 60
     # pso = PSO(func=find_path_func, n_dim=4, pop=20, max_iter=1, lb=[0.12, 0.1, 0.1, 0.1], ub=[0.28, 0.8, 0.8, 0.8],  w=0.8, c1=0.5, c2=0.5)
-    pso = PSO(func=find_path_func, n_dim=4, pop=15, max_iter=1, lb=[10, 0.1, 0.1, 0.1], ub=[40, 0.9, 0.9, 0.9],
-              w=0.99, c1=0.5, c2=0.5)
+    pso = PSO(func=find_path_func, n_dim=4, pop=14, max_iter=1, lb=[10, 0.1, 0.1, 0.1], ub=[40, 0.9, 0.9, 0.9],
+              w=1.1, c1=0.5, c2=0.5)
     print("pso2")
     pso.record_mode = True
 
